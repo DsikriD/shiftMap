@@ -50,6 +50,3 @@
 
 ## 📊 Описание полей смены
 - `logo`, `address`, `companyName`, `dateStartByCity`, `timeStartByCity`, `timeEndByCity`, `currentWorkers`, `planWorkers`, `workTypes`, `priceWorker`, `customerFeedbacksCount`, `customerRating`.
-
-## 📄 Лицензия
-MIT
