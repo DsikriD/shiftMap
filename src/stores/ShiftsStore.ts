@@ -16,23 +16,21 @@ export class ShiftsStore {
   requestLocationPermission = async (): Promise<boolean> => {
     try {
       if (Platform.OS === 'android') {
-        const fine = await PermissionsAndroid.request(
+        const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Доступ к геолокации',
-            message: 'Нужно разрешение, чтобы показать смены рядом с вами',
-            buttonPositive: 'OK',
+            title: 'Разрешение на геолокацию',
+            message: 'Приложению требуется доступ к вашей геолокации для отображения смен.',
+            buttonNeutral: 'Спросить позже',
+            buttonNegative: 'Отмена',
+            buttonPositive: 'Разрешить',
           },
         );
-        if (fine !== PermissionsAndroid.RESULTS.GRANTED) return false;
-        // coarse is implicitly granted with fine on most versions, but request explicitly for completeness
-        await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-        );
-        return true;
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } else {
+        const hasPermission = await Geolocation.requestAuthorization('whenInUse');
+        return hasPermission === 'granted';
       }
-      const hasPermission = await Geolocation.requestAuthorization('whenInUse');
-      return hasPermission === 'granted' || hasPermission === 'always';
     } catch (e) {
       return false;
     }
