@@ -1,5 +1,6 @@
 import {makeAutoObservable, runInAction} from 'mobx';
 import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
+import {PermissionsAndroid, Platform} from 'react-native';
 import {fetchShiftsByCoords, ShiftItem} from '../api/client';
 
 export class ShiftsStore {
@@ -13,9 +14,23 @@ export class ShiftsStore {
   }
 
   requestLocationPermission = async (): Promise<boolean> => {
-    // For Android 12+ precise location is requested at runtime via React Native Permissions normally.
-    // Using geolocation-service requestAuthorization on iOS, Android handled by manifest and prompt.
     try {
+      if (Platform.OS === 'android') {
+        const fine = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Доступ к геолокации',
+            message: 'Нужно разрешение, чтобы показать смены рядом с вами',
+            buttonPositive: 'OK',
+          },
+        );
+        if (fine !== PermissionsAndroid.RESULTS.GRANTED) return false;
+        // coarse is implicitly granted with fine on most versions, but request explicitly for completeness
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        );
+        return true;
+      }
       const hasPermission = await Geolocation.requestAuthorization('whenInUse');
       return hasPermission === 'granted' || hasPermission === 'always';
     } catch (e) {
